@@ -38,6 +38,13 @@ jobs:
           name: tests-coverage-outputs
           path: .
 
+      # Recompiler : le scanner Java exige des .class (sonar.java.binaries) ; l’artefact seul peut être incomplet
+      # ou ignoré selon la version Gradle / le plugin Sonar.
+      - name: Compile Java sources and tests (bytecode for Sonar)
+        run: |
+          chmod +x gradlew
+          ./gradlew compileJava compileTestJava --no-daemon
+
       # Quality Gate : configurée dans build.gradle (sonar.qualitygate.wait=true).
       # Ce job échoue donc si SonarCloud retourne une gate rouge, pas seulement en cas d’erreur réseau/Gradle.
       - name: Run Sonar analysis
@@ -45,5 +52,4 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          chmod +x gradlew
           ./gradlew sonar --no-daemon -x test -x bootJar
