@@ -2,7 +2,6 @@ package com.example.tpdevops.controllers;
 
 import com.example.tpdevops.entities.RentalRecord;
 import com.example.tpdevops.services.RentalHistoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +11,11 @@ import java.util.List;
 @RequestMapping("/rentals")
 public class RentalHistoryController {
 
-    @Autowired
-    private RentalHistoryService rentalHistoryService;
+    private final RentalHistoryService rentalHistoryService;
+
+    public RentalHistoryController(RentalHistoryService rentalHistoryService) {
+        this.rentalHistoryService = rentalHistoryService;
+    }
 
     @GetMapping
     public List<RentalRecord> getAllRecords() {

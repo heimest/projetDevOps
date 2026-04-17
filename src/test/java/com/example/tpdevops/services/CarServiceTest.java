@@ -9,17 +9,17 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CarServiceTest {
+class CarServiceTest {
 
     private CarService carService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         carService = new CarService();
     }
 
     @Test
-    public void testAddCar() {
+    void testAddCar() {
         Car car = new Car("ABC123", "Toyota", 15000.0);
         Car added = carService.addCar(car);
 
@@ -28,15 +28,15 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testAddDuplicateCarThrowsException() {
+    void testAddDuplicateCarThrowsException() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
+        Car duplicate = new Car("ABC123", "Honda", 12000.0);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> carService.addCar(new Car("ABC123", "Honda", 12000.0)));
+        assertThrows(IllegalArgumentException.class, () -> carService.addCar(duplicate));
     }
 
     @Test
-    public void testGetCarsReturnsAll() {
+    void testGetCarsReturnsAll() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
         carService.addCar(new Car("DEF456", "BMW", 25000.0));
 
@@ -45,7 +45,7 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testGetCarByPlateNumberFound() {
+    void testGetCarByPlateNumberFound() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         Optional<Car> car = carService.getCarByPlateNumber("ABC123");
@@ -54,13 +54,13 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testGetCarByPlateNumberNotFound() {
+    void testGetCarByPlateNumberNotFound() {
         Optional<Car> car = carService.getCarByPlateNumber("UNKNOWN");
         assertFalse(car.isPresent());
     }
 
     @Test
-    public void testDeleteCarSuccess() {
+    void testDeleteCarSuccess() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         assertTrue(carService.deleteCar("ABC123"));
@@ -68,12 +68,12 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testDeleteNonExistentCarReturnsFalse() {
+    void testDeleteNonExistentCarReturnsFalse() {
         assertFalse(carService.deleteCar("UNKNOWN"));
     }
 
     @Test
-    public void testRentCarSetsUnavailable() {
+    void testRentCarSetsUnavailable() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         Car rented = carService.rentCar("ABC123");
@@ -81,7 +81,7 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testRentAlreadyRentedCarThrowsException() {
+    void testRentAlreadyRentedCarThrowsException() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
         carService.rentCar("ABC123");
 
@@ -89,12 +89,12 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testRentNonExistentCarThrowsException() {
+    void testRentNonExistentCarThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> carService.rentCar("UNKNOWN"));
     }
 
     @Test
-    public void testReturnCarSetsAvailable() {
+    void testReturnCarSetsAvailable() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
         carService.rentCar("ABC123");
 
@@ -103,14 +103,14 @@ public class CarServiceTest {
     }
 
     @Test
-    public void testReturnAvailableCarThrowsException() {
+    void testReturnAvailableCarThrowsException() {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         assertThrows(IllegalStateException.class, () -> carService.returnCar("ABC123"));
     }
 
     @Test
-    public void testReturnNonExistentCarThrowsException() {
+    void testReturnNonExistentCarThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> carService.returnCar("UNKNOWN"));
     }
 }
