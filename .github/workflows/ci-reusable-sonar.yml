@@ -29,21 +29,23 @@ jobs:
           key: ${{ runner.os }}-sonar-${{ hashFiles('build.gradle') }}
           restore-keys: ${{ runner.os }}-sonar-
 
-      # Même jeu de fichiers que l’étape coverage (tests + JaCoCo + classes). On évite un 2ᵉ artefact
-      # `sonar-inputs` : sans checkout dans coverage, un chemin manquant + if-no-files-found=warn
-      # peut ne rien uploader tout en laissant le job « vert » → Sonar ne trouvait pas sonar-inputs.
-      - name: Download tests and coverage outputs for analysis
+      # 1) Compiler d’abord : bytecode aligné sur les sources du checkout.
+      # 2) Puis télécharger l’artefact des tests : rapport JaCoCo sous build/reports/jacoco/…
+      # Si l’ordre est inversé, compileJava peut faire disparaître le XML et Sonar affiche
+      # « No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths=… » puis QG rouge.
+      - name: Compile Java sources and tests (bytecode for Sonar)
+        run: |
+          chmod +x gradlew
+          ./gradlew compileJava compileTestJava --no-daemon
+
+      - name: Download tests and coverage outputs (JaCoCo + classes CI)
         uses: actions/download-artifact@v4
         with:
           name: tests-coverage-outputs
           path: .
 
-      # Recompiler : le scanner Java exige des .class (sonar.java.binaries) ; l’artefact seul peut être incomplet
-      # ou ignoré selon la version Gradle / le plugin Sonar.
-      - name: Compile Java sources and tests (bytecode for Sonar)
-        run: |
-          chmod +x gradlew
-          ./gradlew compileJava compileTestJava --no-daemon
+      - name: Verify JaCoCo XML is present for Sonar
+        run: test -f build/reports/jacoco/test/jacocoTestReport.xml
 
       # Quality Gate : configurée dans build.gradle (sonar.qualitygate.wait=true).
       # Ce job échoue donc si SonarCloud retourne une gate rouge, pas seulement en cas d’erreur réseau/Gradle.
