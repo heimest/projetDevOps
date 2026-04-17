@@ -16,7 +16,9 @@ on:
 permissions:
   contents: read
   security-events: write
-  actions: read
+  # `upload-artifact` / téléchargement d’artefacts du même run exigent `actions: write` sur le GITHUB_TOKEN.
+  # Avec `actions: read` seul, les artefacts (ex. sonar-inputs) ne sont pas publiés → job sonar « Artifact not found ».
+  actions: write
   checks: write
 
 concurrency:
