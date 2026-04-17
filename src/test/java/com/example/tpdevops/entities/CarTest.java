@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CarTest {
+class CarTest {
 
     @Test
-    public void testCarConstructor() {
+    void testCarConstructor() {
         Car car = new Car("ABC123", "Toyota", 15000.0);
 
         assertEquals("ABC123", car.getPlateNumber());
@@ -17,20 +17,20 @@ public class CarTest {
     }
 
     @Test
-    public void testDefaultConstructorAvailable() {
+    void testDefaultConstructorAvailable() {
         Car car = new Car();
         assertTrue(car.isAvailable());
     }
 
     @Test
-    public void testSetAvailableFalse() {
+    void testSetAvailableFalse() {
         Car car = new Car("ABC123", "Toyota", 15000.0);
         car.setAvailable(false);
         assertFalse(car.isAvailable());
     }
 
     @Test
-    public void testSetAvailableTrue() {
+    void testSetAvailableTrue() {
         Car car = new Car("ABC123", "Toyota", 15000.0);
         car.setAvailable(false);
         car.setAvailable(true);
@@ -38,7 +38,7 @@ public class CarTest {
     }
 
     @Test
-    public void testSetters() {
+    void testSetters() {
         Car car = new Car();
         car.setPlateNumber("XYZ789");
         car.setBrand("BMW");

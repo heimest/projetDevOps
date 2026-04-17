@@ -2,7 +2,6 @@ package com.example.tpdevops.controllers;
 
 import com.example.tpdevops.entities.Car;
 import com.example.tpdevops.services.CarService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +11,11 @@ import java.util.List;
 @RequestMapping("/cars")
 public class RentServiceRestController {
 
-    @Autowired
-    private CarService carService;
+    private final CarService carService;
+
+    public RentServiceRestController(CarService carService) {
+        this.carService = carService;
+    }
 
     @PostMapping
     public ResponseEntity<Car> addCar(@RequestBody Car car) {
