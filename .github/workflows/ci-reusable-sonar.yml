@@ -29,10 +29,13 @@ jobs:
           key: ${{ runner.os }}-sonar-${{ hashFiles('build.gradle') }}
           restore-keys: ${{ runner.os }}-sonar-
 
-      - name: Download bytecode and JaCoCo report for analysis
+      # Même jeu de fichiers que l’étape coverage (tests + JaCoCo + classes). On évite un 2ᵉ artefact
+      # `sonar-inputs` : sans checkout dans coverage, un chemin manquant + if-no-files-found=warn
+      # peut ne rien uploader tout en laissant le job « vert » → Sonar ne trouvait pas sonar-inputs.
+      - name: Download tests and coverage outputs for analysis
         uses: actions/download-artifact@v4
         with:
-          name: sonar-inputs
+          name: tests-coverage-outputs
           path: .
 
       # Quality Gate : configurée dans build.gradle (sonar.qualitygate.wait=true).
