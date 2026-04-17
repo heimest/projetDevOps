@@ -1,4 +1,11 @@
-name: CI - Kubernetes Integration Tests
+# Orchestrateur CI : une exécution, plusieurs fichiers (ci-reusable-*.yml) via workflow_call.
+# Même comportement qu’avant : build → tests → coverage → sonar → docker (gate Sonar).
+#
+# Secrets optionnels :
+#   SONAR_TOKEN      — SonarCloud (obligatoire pour que le job sonar réussisse ; non testable dans `if:` job, voir doc GitHub)
+#   CODECOV_TOKEN    — Codecov
+
+name: CI
 
 on:
   push:
@@ -9,70 +16,46 @@ on:
 permissions:
   contents: read
   security-events: write
-  actions: read
+  # `upload-artifact` / téléchargement d’artefacts du même run exigent `actions: write` sur le GITHUB_TOKEN.
+  # Avec `actions: read` seul, les artefacts (ex. sonar-inputs) ne sont pas publiés → job sonar « Artifact not found ».
+  actions: write
   checks: write
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+  build:
+    uses: ./.github/workflows/ci-reusable-build.yml
+    secrets: inherit
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  tests:
+    needs: [ build ]
+    uses: ./.github/workflows/ci-reusable-tests.yml
+    secrets: inherit
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
+  coverage:
+    needs: [ tests ]
+    uses: ./.github/workflows/ci-reusable-coverage.yml
+    secrets: inherit
 
-      - name: Build Java services
-        run: |
-          chmod +x gradlew
-          ./gradlew build --no-daemon -x test
+  sonar:
+    needs: [ coverage ]
+    # `secrets` n’est pas autorisé dans `if:` au niveau job (erreur « Unrecognized named-value: secrets »).
+    # On limite Sonar aux dépôts non-fork et aux PR internes (pas de PR depuis un fork externe).
+    if: >-
+      github.event.repository.fork == false
+      && (github.event_name != 'pull_request'
+          || github.event.pull_request.head.repo.full_name == github.repository)
+    uses: ./.github/workflows/ci-reusable-sonar.yml
+    secrets: inherit
 
-      - name: Run tests and generate coverage
-        run: |
-          ./gradlew test jacocoTestReport --no-daemon
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: build/reports/jacoco/test/jacocoTestReport.xml
-          fail_ci_if_error: false
-
-      - name: Publish test results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: JUnit Tests
-          path: 'build/test-results/test/TEST-*.xml'
-          reporter: java-junit
-
-      - name: Upload test report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-report
-          path: build/reports/tests/test/
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Build and analyze with SonarCloud
-        env:
-          SONAR_HOST_URL: https://sonarcloud.io
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          ./gradlew build sonar --no-daemon
-
-      - name: Build Docker image
-        run: |
-          docker build -t hello:latest -f Dockerfile .
+  docker:
+    needs: [ coverage, sonar ]
+    if: >-
+      always()
+      && needs.coverage.result == 'success'
+      && (needs.sonar.result == 'success' || needs.sonar.result == 'skipped')
+    uses: ./.github/workflows/ci-reusable-docker.yml
+    secrets: inherit

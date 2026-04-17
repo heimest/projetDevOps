@@ -1,0 +1,73 @@
+# Étape CI : Codecov + artefacts Sonar / rapport HTML JaCoCo.
+# Appelé depuis action.yml uniquement (workflow_call).
+#
+# Sans checkout, le workspace peut être minimal ; l’artefact doit recréer `build/…`.
+# Codecov CLI v4 peut signaler « not found » sur un chemin explicite tout en trouvant
+# le fichier via recherche — on fixe le chemin après téléchargement + on utilise un glob fiable.
+
+on:
+  workflow_call:
+
+jobs:
+  coverage:
+    name: Coverage (Codecov + artefacts)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download test and JaCoCo outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-coverage-outputs
+          path: .
+
+      - name: Resolve JaCoCo XML for Codecov
+        id: jacoco
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="build/reports/jacoco/test/jacocoTestReport.xml"
+          if [[ -f "$expected" ]]; then
+            echo "xml_path=$expected" >> "$GITHUB_OUTPUT"
+            echo "html_dir=build/reports/jacoco" >> "$GITHUB_OUTPUT"
+            echo "Resolved JaCoCo XML at $expected"
+            exit 0
+          fi
+          echo "::warning::Expected $expected missing; searching workspace…"
+          mapfile -t hits < <(find . -name jacocoTestReport.xml -type f ! -path './.git/*' 2>/dev/null || true)
+          if [[ ${#hits[@]} -eq 0 ]]; then
+            echo "::error::No jacocoTestReport.xml under workspace after artifact download"
+            find . -maxdepth 5 -type d 2>/dev/null | head -40
+            exit 1
+          fi
+          xml="${hits[0]#./}"
+          dir=$(dirname "$xml")
+          parent=$(dirname "$dir")
+          parent="${parent#./}"
+          echo "xml_path=$xml" >> "$GITHUB_OUTPUT"
+          # Rapport HTML Gradle : …/jacoco/test/html — on publie le dossier `jacoco` parent si présent
+          if [[ -d build/reports/jacoco ]]; then
+            echo "html_dir=build/reports/jacoco" >> "$GITHUB_OUTPUT"
+          else
+            echo "html_dir=$parent" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Using JaCoCo XML at $xml"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ steps.jacoco.outputs.xml_path }}
+          fail_ci_if_error: false
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html-report
+          retention-days: 7
+          path: ${{ steps.jacoco.outputs.html_dir }}/
+          if-no-files-found: warn
+
+      # Pas d’artefact `sonar-inputs` : le job Sonar télécharge `tests-coverage-outputs`.

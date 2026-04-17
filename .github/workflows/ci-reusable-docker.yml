@@ -1,0 +1,17 @@
+# Étape CI : construction de l’image Docker (runtime).
+# Appelé depuis action.yml uniquement (workflow_call).
+
+on:
+  workflow_call:
+
+jobs:
+  docker:
+    name: Docker (image)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t hello:latest -f Dockerfile .
