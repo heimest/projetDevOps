@@ -20,11 +20,11 @@ class RentalHistoryServiceTest {
 
     @Test
     void testStartRental() {
-        RentalRecord record = service.startRental("ABC123", "Alice", 50.0);
-        assertEquals("ABC123", record.getPlateNumber());
-        assertEquals("Alice", record.getCustomerName());
-        assertEquals("ACTIVE", record.getStatus());
-        assertEquals(50.0, record.getTotalPrice());
+        RentalRecord rental = service.startRental("ABC123", "Alice", 50.0);
+        assertEquals("ABC123", rental.getPlateNumber());
+        assertEquals("Alice", rental.getCustomerName());
+        assertEquals("ACTIVE", rental.getStatus());
+        assertEquals(50.0, rental.getTotalPrice());
     }
 
     @Test

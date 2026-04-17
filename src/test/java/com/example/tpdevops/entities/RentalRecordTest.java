@@ -11,34 +11,34 @@ class RentalRecordTest {
     @Test
     void testConstructor() {
         LocalDateTime start = LocalDateTime.now();
-        RentalRecord record = new RentalRecord("ABC123", "Alice", start);
+        RentalRecord rental = new RentalRecord("ABC123", "Alice", start);
 
-        assertEquals("ABC123", record.getPlateNumber());
-        assertEquals("Alice", record.getCustomerName());
-        assertEquals(start, record.getStartDate());
-        assertEquals("ACTIVE", record.getStatus());
-        assertNull(record.getEndDate());
+        assertEquals("ABC123", rental.getPlateNumber());
+        assertEquals("Alice", rental.getCustomerName());
+        assertEquals(start, rental.getStartDate());
+        assertEquals("ACTIVE", rental.getStatus());
+        assertNull(rental.getEndDate());
     }
 
     @Test
     void testSetEndDate() {
-        RentalRecord record = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
+        RentalRecord rental = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
         LocalDateTime end = LocalDateTime.now().plusDays(3);
-        record.setEndDate(end);
-        assertEquals(end, record.getEndDate());
+        rental.setEndDate(end);
+        assertEquals(end, rental.getEndDate());
     }
 
     @Test
     void testSetStatus() {
-        RentalRecord record = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
-        record.setStatus("COMPLETED");
-        assertEquals("COMPLETED", record.getStatus());
+        RentalRecord rental = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
+        rental.setStatus("COMPLETED");
+        assertEquals("COMPLETED", rental.getStatus());
     }
 
     @Test
     void testSetTotalPrice() {
-        RentalRecord record = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
-        record.setTotalPrice(150.0);
-        assertEquals(150.0, record.getTotalPrice());
+        RentalRecord rental = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
+        rental.setTotalPrice(150.0);
+        assertEquals(150.0, rental.getTotalPrice());
     }
 }
