@@ -23,6 +23,9 @@ jobs:
           name: tests-coverage-outputs
           path: .
 
+      - name: Restore build/ layout (upload-artifact v4 LCA strips build/ prefix)
+        uses: ./.github/actions/normalize-v4-build-artifact
+
       - name: Resolve JaCoCo XML for Codecov
         id: jacoco
         shell: bash
