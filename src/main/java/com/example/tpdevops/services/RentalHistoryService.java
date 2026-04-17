@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class RentalHistoryService {
@@ -16,10 +15,10 @@ public class RentalHistoryService {
     private final List<RentalRecord> records = new ArrayList<>();
 
     public RentalRecord startRental(String plateNumber, String customerName, double dailyPrice) {
-        RentalRecord record = new RentalRecord(plateNumber, customerName, LocalDateTime.now());
-        record.setTotalPrice(dailyPrice);
-        records.add(record);
-        return record;
+        RentalRecord rental = new RentalRecord(plateNumber, customerName, LocalDateTime.now());
+        rental.setTotalPrice(dailyPrice);
+        records.add(rental);
+        return rental;
     }
 
     public Optional<RentalRecord> endRental(String plateNumber) {
@@ -42,13 +41,13 @@ public class RentalHistoryService {
     public List<RentalRecord> getRecordsByCustomer(String customerName) {
         return records.stream()
                 .filter(r -> r.getCustomerName().equals(customerName))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<RentalRecord> getActiveRentals() {
         return records.stream()
                 .filter(r -> "ACTIVE".equals(r.getStatus()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void clearAll() {
