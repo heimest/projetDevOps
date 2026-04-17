@@ -1,0 +1,46 @@
+# Étape CI : SonarCloud (Quality Gate via build.gradle).
+# Appelé depuis action.yml uniquement (workflow_call).
+
+on:
+  workflow_call:
+
+jobs:
+  sonar:
+    name: Quality (SonarCloud)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar-${{ hashFiles('build.gradle') }}
+          restore-keys: ${{ runner.os }}-sonar-
+
+      - name: Download bytecode and JaCoCo report for analysis
+        uses: actions/download-artifact@v4
+        with:
+          name: sonar-inputs
+          path: .
+
+      # Quality Gate : configurée dans build.gradle (sonar.qualitygate.wait=true).
+      # Ce job échoue donc si SonarCloud retourne une gate rouge, pas seulement en cas d’erreur réseau/Gradle.
+      - name: Run Sonar analysis
+        env:
+          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          chmod +x gradlew
+          ./gradlew sonar --no-daemon -x test -x bootJar

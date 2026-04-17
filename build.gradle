@@ -46,12 +46,18 @@ tasks.named('jacocoTestReport') {
 
 sonar {
     properties {
-        property 'sonar.projectKey', 'heimest_tp_devops'
+        property 'sonar.projectKey', 'heimest_projetDevOps'
         property 'sonar.organization', 'heimest'
         property 'sonar.host.url', 'https://sonarcloud.io'
         property 'sonar.sources', 'src/main/java'
         property 'sonar.tests', 'src/test/java'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+
+        // Quality Gate : le scanner attend le verdict SonarCloud ; la tâche `sonar` échoue si la gate est rouge.
+        // Réf. : https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/configuration-overview
+        // Local sans attente : ./gradlew sonar -Dsonar.qualitygate.wait=false
+        property 'sonar.qualitygate.wait', 'true'
+        property 'sonar.qualitygate.timeout', '300'
     }
 }
 

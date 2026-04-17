@@ -1,0 +1,37 @@
+# Étape CI : compilation + bootJar (sans exécuter les tests).
+# Appelé depuis action.yml uniquement (workflow_call).
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Build (compile + bootJar)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Compile and package (skip test execution)
+        run: |
+          chmod +x gradlew
+          ./gradlew testClasses bootJar --no-daemon -x test
+
+      - name: Upload Gradle build outputs for downstream jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build
+          retention-days: 2
+          path: |
+            build/classes
+            build/resources
+            build/generated
+            build/libs

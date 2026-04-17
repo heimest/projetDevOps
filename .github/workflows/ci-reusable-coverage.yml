@@ -1,0 +1,40 @@
+# Étape CI : Codecov + artefacts Sonar / rapport HTML JaCoCo.
+# Appelé depuis action.yml uniquement (workflow_call).
+
+on:
+  workflow_call:
+
+jobs:
+  coverage:
+    name: Coverage (Codecov + artefacts)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download test and JaCoCo outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: tests-coverage-outputs
+          path: .
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          fail_ci_if_error: false
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-html-report
+          retention-days: 7
+          path: build/reports/jacoco/
+
+      - name: Upload Sonar inputs (bytecode + JaCoCo XML)
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-inputs
+          retention-days: 2
+          path: |
+            build/classes
+            build/reports/jacoco/test/jacocoTestReport.xml
