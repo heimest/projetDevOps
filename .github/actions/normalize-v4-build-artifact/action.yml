@@ -1,0 +1,36 @@
+# upload-artifact@v4 : plusieurs chemins « build/… » → racine d’artefact = contenu de build/
+# (cf. README : « least common ancestor … root directory of the artifact »).
+# Après download-artifact vers « . », on obtient reports/, classes/, etc. à la racine,
+# pas build/reports/… — il faut reconstituer build/ pour Gradle / Sonar / Codecov.
+name: Normalize v4 build artifact layout
+description: Merge artifact root dirs (reports, classes, …) back under build/
+
+runs:
+  using: composite
+  steps:
+    - name: Recompose build/
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ -f build/reports/jacoco/test/jacocoTestReport.xml ]]; then
+          echo "build/ layout already OK."
+          exit 0
+        fi
+        mkdir -p build
+        for name in reports classes jacoco test-results resources generated libs; do
+          if [[ -d $name ]]; then
+            if [[ ! -d build/$name ]]; then
+              mv "$name" build/
+            else
+              mkdir -p "build/$name"
+              cp -a "$name"/. "build/$name"/
+              rm -rf "$name"
+            fi
+          fi
+        done
+        if [[ ! -f build/reports/jacoco/test/jacocoTestReport.xml ]]; then
+          echo "::error::JaCoCo XML still missing after normalize. Top-level dirs:"
+          find . -maxdepth 2 -type d ! -path './.git/*' | head -40
+          exit 1
+        fi
+        echo "Normalized: build/reports/jacoco/test/jacocoTestReport.xml present."
