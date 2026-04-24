@@ -20,9 +20,27 @@ repositories {
     mavenCentral()
 }
 
+def testcontainersVersion = "1.20.6"
+
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.apache.commons' && details.requested.name == 'commons-compress') {
+            details.useVersion '1.27.1'
+            details.because 'Remonte la version transitive (CVE-2024-25710, CVE-2024-26308 signalées sur 1.24.x).'
+        }
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    /* Flyway : versionnement du schéma côté SQL, équivalent « entreprise » d’Alembic (écosystème Java). */
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation platform("org.testcontainers:testcontainers-bom:$testcontainersVersion")
+    testImplementation 'org.testcontainers:postgresql'
 }
 
 tasks.named('test') {

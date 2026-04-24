@@ -2,11 +2,11 @@ package com.example.tpdevops.controllers;
 
 import com.example.tpdevops.entities.Car;
 import com.example.tpdevops.services.CarService;
+import com.example.tpdevops.testsupport.AbstractPostgresIT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -15,8 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-class RentServiceRestTest {
+class RentServiceRestTest extends AbstractPostgresIT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -31,7 +30,6 @@ class RentServiceRestTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        carService.clearAll(); // repart d'un état propre avant chaque test
     }
 
     @Test
@@ -39,12 +37,12 @@ class RentServiceRestTest {
         Car car = new Car("ABC123", "Toyota", 15000.0);
 
         mockMvc.perform(post("/cars")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(car)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plateNumber").value("ABC123"))
-                .andExpect(jsonPath("$.brand").value("Toyota"))
-                .andExpect(jsonPath("$.available").value(true));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(car)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.plateNumber").value("ABC123"))
+            .andExpect(jsonPath("$.brand").value("Toyota"))
+            .andExpect(jsonPath("$.available").value(true));
     }
 
     @Test
@@ -52,9 +50,9 @@ class RentServiceRestTest {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         mockMvc.perform(post("/cars")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new Car("ABC123", "Honda", 12000.0))))
-                .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new Car("ABC123", "Honda", 12000.0))))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -63,8 +61,8 @@ class RentServiceRestTest {
         carService.addCar(new Car("DEF456", "BMW", 25000.0));
 
         mockMvc.perform(get("/cars"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
@@ -72,15 +70,15 @@ class RentServiceRestTest {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         mockMvc.perform(get("/cars/ABC123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.brand").value("Toyota"))
-                .andExpect(jsonPath("$.price").value(15000.0));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.brand").value("Toyota"))
+            .andExpect(jsonPath("$.price").value(15000.0));
     }
 
     @Test
     void testGetCarByPlateNumberNotFound() throws Exception {
         mockMvc.perform(get("/cars/UNKNOWN"))
-                .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -88,13 +86,13 @@ class RentServiceRestTest {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         mockMvc.perform(delete("/cars/ABC123"))
-                .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent());
     }
 
     @Test
     void testDeleteCarNotFound() throws Exception {
         mockMvc.perform(delete("/cars/UNKNOWN"))
-                .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -102,14 +100,14 @@ class RentServiceRestTest {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         mockMvc.perform(put("/cars/ABC123/rent"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.available").value(false));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available").value(false));
     }
 
     @Test
     void testRentCarNotFound() throws Exception {
         mockMvc.perform(put("/cars/UNKNOWN/rent"))
-                .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -118,7 +116,7 @@ class RentServiceRestTest {
         carService.rentCar("ABC123");
 
         mockMvc.perform(put("/cars/ABC123/rent"))
-                .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -127,14 +125,14 @@ class RentServiceRestTest {
         carService.rentCar("ABC123");
 
         mockMvc.perform(put("/cars/ABC123/return"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.available").value(true));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available").value(true));
     }
 
     @Test
     void testReturnCarNotFound() throws Exception {
         mockMvc.perform(put("/cars/UNKNOWN/return"))
-                .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -142,6 +140,6 @@ class RentServiceRestTest {
         carService.addCar(new Car("ABC123", "Toyota", 15000.0));
 
         mockMvc.perform(put("/cars/ABC123/return"))
-                .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest());
     }
 }

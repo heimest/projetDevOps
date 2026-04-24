@@ -1,5 +1,7 @@
 # Étape CI : JUnit + JaCoCo.
 # Appelé depuis action.yml uniquement (workflow_call).
+# Les tests d’intégration utilisent Testcontainers (URL jdbc:tc: en profil test) : l’exécuteur
+# ubuntu-latest fournit Docker, requis par le driver org.testcontainers.jdbc.
 
 on:
   workflow_call:
