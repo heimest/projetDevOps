@@ -1,6 +1,8 @@
 package com.example.tpdevops.controllers;
 
-import com.example.tpdevops.entities.Car;
+import com.example.tpdevops.dto.CarDtoMapper;
+import com.example.tpdevops.dto.CarRequestDto;
+import com.example.tpdevops.dto.CarResponseDto;
 import com.example.tpdevops.services.CarService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,24 +20,25 @@ public class RentServiceRestController {
     }
 
     @PostMapping
-    public ResponseEntity<Car> addCar(@RequestBody Car car) {
+    public ResponseEntity<CarResponseDto> addCar(@RequestBody CarRequestDto car) {
         try {
-            return ResponseEntity.ok(carService.addCar(car));
+            return ResponseEntity.ok(CarDtoMapper.toResponse(carService.addCar(CarDtoMapper.toEntity(car))));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping
-    public List<Car> getCars() {
-        return carService.getCars();
+    public List<CarResponseDto> getCars() {
+        return carService.getCars().stream().map(CarDtoMapper::toResponse).toList();
     }
 
     @GetMapping("/{plateNumber}")
-    public ResponseEntity<Car> getCarByPlateNumber(@PathVariable String plateNumber) {
+    public ResponseEntity<CarResponseDto> getCarByPlateNumber(@PathVariable String plateNumber) {
         return carService.getCarByPlateNumber(plateNumber)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            .map(CarDtoMapper::toResponse)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{plateNumber}")
@@ -47,9 +50,9 @@ public class RentServiceRestController {
     }
 
     @PutMapping("/{plateNumber}/rent")
-    public ResponseEntity<Car> rentCar(@PathVariable String plateNumber) {
+    public ResponseEntity<CarResponseDto> rentCar(@PathVariable String plateNumber) {
         try {
-            return ResponseEntity.ok(carService.rentCar(plateNumber));
+            return ResponseEntity.ok(CarDtoMapper.toResponse(carService.rentCar(plateNumber)));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
@@ -58,9 +61,9 @@ public class RentServiceRestController {
     }
 
     @PutMapping("/{plateNumber}/return")
-    public ResponseEntity<Car> returnCar(@PathVariable String plateNumber) {
+    public ResponseEntity<CarResponseDto> returnCar(@PathVariable String plateNumber) {
         try {
-            return ResponseEntity.ok(carService.returnCar(plateNumber));
+            return ResponseEntity.ok(CarDtoMapper.toResponse(carService.returnCar(plateNumber)));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
