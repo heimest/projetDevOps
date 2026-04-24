@@ -1,13 +1,11 @@
 package com.example.tpdevops;
 
+import com.example.tpdevops.testsupport.AbstractPostgresIT;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class TpdevopsApplicationTests {
+class TpdevopsApplicationTests extends AbstractPostgresIT {
 
     @Test
     void contextLoads() {
     }
-
 }

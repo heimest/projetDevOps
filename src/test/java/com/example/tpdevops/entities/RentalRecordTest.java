@@ -11,18 +11,20 @@ class RentalRecordTest {
     @Test
     void testConstructor() {
         LocalDateTime start = LocalDateTime.now();
-        RentalRecord rental = new RentalRecord("ABC123", "Alice", start);
+        Car car = new Car("ABC123", "T", 1.0);
+        RentalRecord rental = new RentalRecord(car, "Alice", start);
 
         assertEquals("ABC123", rental.getPlateNumber());
         assertEquals("Alice", rental.getCustomerName());
         assertEquals(start, rental.getStartDate());
-        assertEquals("ACTIVE", rental.getStatus());
+        assertEquals(RentalStatus.ACTIVE, rental.getStatus());
         assertNull(rental.getEndDate());
     }
 
     @Test
     void testSetEndDate() {
-        RentalRecord rental = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
+        Car car = new Car("ABC123", "T", 1.0);
+        RentalRecord rental = new RentalRecord(car, "Alice", LocalDateTime.now());
         LocalDateTime end = LocalDateTime.now().plusDays(3);
         rental.setEndDate(end);
         assertEquals(end, rental.getEndDate());
@@ -30,14 +32,16 @@ class RentalRecordTest {
 
     @Test
     void testSetStatus() {
-        RentalRecord rental = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
-        rental.setStatus("COMPLETED");
-        assertEquals("COMPLETED", rental.getStatus());
+        Car car = new Car("ABC123", "T", 1.0);
+        RentalRecord rental = new RentalRecord(car, "Alice", LocalDateTime.now());
+        rental.setStatus(RentalStatus.COMPLETED);
+        assertEquals(RentalStatus.COMPLETED, rental.getStatus());
     }
 
     @Test
     void testSetTotalPrice() {
-        RentalRecord rental = new RentalRecord("ABC123", "Alice", LocalDateTime.now());
+        Car car = new Car("ABC123", "T", 1.0);
+        RentalRecord rental = new RentalRecord(car, "Alice", LocalDateTime.now());
         rental.setTotalPrice(150.0);
         assertEquals(150.0, rental.getTotalPrice());
     }

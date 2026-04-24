@@ -1,0 +1,35 @@
+# Pile applicative : PostgreSQL (schéma Flyway au démarrage) + JAR Spring Boot.
+#   docker compose up -d
+#   curl http://localhost:8090/
+# Les variables SPRING_DATASOURCE_* de « app » pointent sur le conteneur « postgres » (résolution DNS
+# sur le réseau du projet) — pas de « localhost » entre conteneurs.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tpdevops
+      POSTGRES_USER: tpdevops
+      POSTGRES_PASSWORD: tpdevops
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tpdevops-app:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tpdevops
+      SPRING_DATASOURCE_USERNAME: tpdevops
+      SPRING_DATASOURCE_PASSWORD: tpdevops
+    ports:
+      - "8090:8090"
