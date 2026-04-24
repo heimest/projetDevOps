@@ -99,14 +99,14 @@ class RentalRecordTest {
         void equalsIsFalseForNull() {
             RentalRecord r = new RentalRecord();
             r.setId(1L);
-            assertFalse(r.equals(null));
+            assertNotEquals(r, null);
         }
 
         @Test
         void equalsIsFalseForOtherClass() {
             RentalRecord r = new RentalRecord();
             r.setId(1L);
-            assertFalse(r.equals("x"));
+            assertNotEquals(r, "x");
         }
 
         @Test

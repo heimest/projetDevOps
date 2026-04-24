@@ -60,13 +60,13 @@ class CarTest {
 
         @Test
         void equalsIsFalseForNull() {
-            // Doit appeler c.equals(null) (pas Objects.equals) pour couvrir l’arbre JaCoCo.
-            assertFalse(new Car("P1", "B", 1.0).equals(null));
+            // L’entité en premier : Objects.equals(e, o) en délègue à e.equals(o) (même exécution qu’avant).
+            assertNotEquals(new Car("P1", "B", 1.0), null);
         }
 
         @Test
         void equalsIsFalseForOtherClass() {
-            assertFalse(new Car("P1", "B", 1.0).equals("not a car"));
+            assertNotEquals(new Car("P1", "B", 1.0), "not a car");
         }
 
         @Test
