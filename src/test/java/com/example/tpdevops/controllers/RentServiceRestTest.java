@@ -1,5 +1,6 @@
 package com.example.tpdevops.controllers;
 
+import com.example.tpdevops.dto.CarRequestDto;
 import com.example.tpdevops.entities.Car;
 import com.example.tpdevops.services.CarService;
 import com.example.tpdevops.testsupport.AbstractPostgresIT;
@@ -34,7 +35,7 @@ class RentServiceRestTest extends AbstractPostgresIT {
 
     @Test
     void testAddCar() throws Exception {
-        Car car = new Car("ABC123", "Toyota", 15000.0);
+        CarRequestDto car = new CarRequestDto("ABC123", "Toyota", 15000.0);
 
         mockMvc.perform(post("/cars")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -51,7 +52,8 @@ class RentServiceRestTest extends AbstractPostgresIT {
 
         mockMvc.perform(post("/cars")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new Car("ABC123", "Honda", 12000.0))))
+                .content(objectMapper.writeValueAsString(
+                    new CarRequestDto("ABC123", "Honda", 12000.0))))
             .andExpect(status().isBadRequest());
     }
 
