@@ -1,3 +1,4 @@
+-- cible: PostgreSQL (dialecte 16) ; exécuté par Flyway, pas en direct depuis l'IDE
 /*
  * Schéma initial (PostgreSQL).
  * Flyway = gestion de versions du schéma, comparable à Alembic en écosystème Java/Spring.

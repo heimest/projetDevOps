@@ -25,13 +25,13 @@ import java.util.Objects;
  * d’Hibernate; la relation côté persistance reste explicite pour les jointures.
  */
 @Entity
-@Table(name = "rental_records")
+@Table(name = "rental_records", schema = "public")
 @DynamicUpdate
 public class RentalRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, updatable = false)
+    @Column(name = "id", updatable = false)
     private Long id;
 
     @JsonIgnore
@@ -44,7 +44,7 @@ public class RentalRecord {
     )
     private Car car;
 
-    @Column(name = "customer_name", nullable = false, length = 255)
+    @Column(name = "customer_name", nullable = false)
     private String customerName;
 
     @Column(name = "start_date", nullable = false)
@@ -143,14 +143,20 @@ public class RentalRecord {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null) {
+            return false;
+        }
+        if (getClass() != o.getClass()) {
             return false;
         }
         RentalRecord that = (RentalRecord) o;
-        if (id != null && that.id != null) {
-            return id.equals(that.id);
+        if (id == null) {
+            return false;
         }
-        return false;
+        if (that.id == null) {
+            return false;
+        }
+        return id.equals(that.id);
     }
 
     @Override

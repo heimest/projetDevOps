@@ -13,24 +13,25 @@ import java.util.Objects;
  * La persistance est gérée par JPA; le schéma applicatif est appliqué par Flyway (pas par {@code ddl-auto} create).
  */
 @Entity
-@Table(name = "cars")
+@Table(name = "cars", schema = "public")
 @DynamicUpdate
 public class Car {
 
     @Id
-    @Column(name = "plate_number", length = 64, updatable = false, nullable = false)
+    @Column(name = "plate_number", length = 64, updatable = false)
     private String plateNumber;
 
-    @Column(name = "brand", nullable = false, length = 255)
+    @Column(name = "brand", nullable = false)
     private String brand;
 
     @Column(name = "price", nullable = false)
     private double price;
 
     @Column(name = "available", nullable = false)
-    private boolean available = true;
+    private boolean available;
 
     public Car() {
+        this.available = true;
     }
 
     public Car(String plateNumber, String brand, double price) {
@@ -77,11 +78,17 @@ public class Car {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null) {
+            return false;
+        }
+        if (getClass() != o.getClass()) {
             return false;
         }
         Car car = (Car) o;
-        return plateNumber != null && plateNumber.equals(car.plateNumber);
+        if (plateNumber == null) {
+            return false;
+        }
+        return plateNumber.equals(car.plateNumber);
     }
 
     @Override

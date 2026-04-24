@@ -100,6 +100,6 @@ class RentalHistoryServiceIT extends AbstractPostgresIT {
 
         List<RentalRecord> active = service.getActiveRentals();
         assertEquals(1, active.size());
-        assertEquals("A2", active.get(0).getPlateNumber());
+        assertEquals("A2", active.getFirst().getPlateNumber());
     }
 }

@@ -35,6 +35,6 @@ class CarRepositoryIT extends AbstractPostgresIT {
         );
         List<Car> match = carRepository.findAll(example);
         assertEquals(1, match.size());
-        assertEquals("A", match.get(0).getPlateNumber());
+        assertEquals("A", match.getFirst().getPlateNumber());
     }
 }
